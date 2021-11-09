@@ -13,6 +13,7 @@ import numpy as np
 
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.regularizers import l2
 import tensorflow as tf
 
 # define the datatypes for correct csv parsing
@@ -40,6 +41,8 @@ covid_data = covid_data.drop(['county', 'cases', 'state', 'fips'], axis=1)
 covid_data['deaths'] -= covid_data['deaths'].shift(1).fillna(0)
 covid_data['deaths'] = covid_data['deaths'].astype(int)
 covid_data = covid_data.set_index('date')
+covid_data = covid_data.clip(0, covid_data['deaths'].max())
+
 
 # split into training and testing data
 test_cutoff = covid_data.index.max() - timedelta(days=30)
@@ -51,13 +54,13 @@ plt.show()
 
 # scale the data for faster processing
 sc = MinMaxScaler(feature_range=(0, 1))
-sc.fit_transform(covid_data)
+covid_scaled = sc.fit_transform(covid_data)
 train_scaled = sc.transform(train)
 test_scaled = sc.transform(test)
 max_val = covid_data['deaths'].max()
 
 # set the look-back to 10, create X_train and y_train
-n_lag = 10
+n_lag = 28
 X_train = []
 y_train = []
 for i in range(n_lag, len(train)):
@@ -78,18 +81,37 @@ for i in range(n_lag, len(test)):
 X_test, y_test = np.array(X_test), np.array(y_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
+X_val = []
+y_val = []
+time = []
+for i in range(n_lag, len(covid_data)):
+    X_val.append(covid_scaled[i - n_lag:i, 0])
+    time.append(covid_data.index[i])
+    y_val.append(covid_scaled[i, 0])
+
+X_val, y_val = np.array(X_val), np.array(y_val)
+X_val = np.reshape(X_val, (X_val.shape[0], X_val.shape[1], 1))
+
 # define a LSTM
 model = Sequential()
-model.add(LSTM(units=n_lag, activation='tanh', input_shape=(n_lag, 1), return_sequences=True))
+model.add(LSTM(units=n_lag, activation='relu', input_shape=(n_lag, 1), return_sequences=True, kernel_regularizer=l2(0.01), recurrent_regularizer=l2(0.01), bias_regularizer=l2(0.01)))
 model.add(Dropout(0.2))
-model.add(LSTM(units=30, activation='tanh'))
+model.add(LSTM(units=30, activation='relu'))
 model.add(Dropout(0.2))
-model.add(Dense(units=1, activation='softmax'))
+model.add(Dense(units=1, activation='sigmoid'))
 
 # compile on the data
-callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=3)
+callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
 opt = tf.keras.optimizers.Adam(learning_rate=1e-4)
-model.compile(loss='mse', optimizer=opt, metrics=[tf.keras.metrics.BinaryCrossentropy()])
-fit_history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=200, callbacks=[callback])
-predict = model.predict(X_test)
-print(predict)
+model.compile(loss='mse', optimizer=opt, metrics=['mse'])
+fit_history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=500, callbacks=[callback])
+scaled_predict = model.predict(X_val)
+predict = sc.inverse_transform(scaled_predict)
+plt.plot(time, predict, label='predicted')
+plt.plot(covid_data.index, covid_data['deaths'], label='actual')
+plt.title('COVID Deaths')
+plt.xlabel('Time')
+plt.ylabel('Deaths')
+plt.legend()
+plt.show()
+
