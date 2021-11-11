@@ -3,7 +3,7 @@ Predicting the number of COVID-19 deaths given time series data.
 
 Dataset being used: https://www.kaggle.com/fireballbyedimyrnmom/us-counties-covid-19-dataset
 """
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
@@ -113,4 +113,25 @@ plt.legend()
 plt.show()
 
 
+# Now, predict the next week of deaths
+X_new = covid_scaled[len(covid_scaled) - n_lag:len(covid_scaled), 0]
+starting_time = covid_data.index[len(covid_data) - 1] + timedelta(days=1)
+times = []
+predicted_values = []
+for i in range(7):
+    X_new_temp = np.asarray([X_new])
+    X_new_temp = np.reshape(X_new_temp, (X_new_temp.shape[0], X_new_temp.shape[1], 1))
+    scaled_predict = model.predict(X_new_temp)
+    predict = sc.inverse_transform(scaled_predict)
+    predicted_values.append(predict[0, 0])
+    X_new = np.concatenate([X_new, predict[0]])
+    X_new = np.delete(X_new, [0])
+    times.append(starting_time + timedelta(days=i))
 
+plt.plot(times, predicted_values)
+plt.title('Predicted COVID-19 Cases in Pierce County')
+plt.xlabel('Time')
+plt.xticks(rotation=45)
+plt.ylabel('Cases')
+plt.savefig(datetime.now().strftime('predicted_covid_cases_week_of_%Y_%m_%d'))
+plt.show()

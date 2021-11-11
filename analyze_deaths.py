@@ -3,6 +3,7 @@ Predicting the number of COVID-19 deaths given time series data.
 
 Dataset being used: https://www.kaggle.com/fireballbyedimyrnmom/us-counties-covid-19-dataset
 """
+from datetime import datetime
 from datetime import timedelta
 
 import matplotlib.pyplot as plt
@@ -91,7 +92,13 @@ X_val = np.reshape(X_val, (X_val.shape[0], X_val.shape[1], 1))
 
 # define a LSTM (predicting deaths)
 model = Sequential()
-model.add(LSTM(units=n_lag, activation='relu', input_shape=(n_lag, 1), return_sequences=True, kernel_regularizer=l2(0.1), recurrent_regularizer=l2(0.1), bias_regularizer=l2(0.1)))
+model.add(LSTM(units=n_lag,
+               activation='relu',
+               input_shape=(n_lag, 1),
+               return_sequences=True,
+               kernel_regularizer=l2(0.1),
+               recurrent_regularizer=l2(0.1),
+               bias_regularizer=l2(0.1)))
 model.add(Dropout(0.2))
 model.add(LSTM(units=30, activation='relu'))
 model.add(Dropout(0.2))
@@ -101,7 +108,7 @@ model.add(Dense(units=1, activation='sigmoid'))
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
 opt = tf.keras.optimizers.Adam(learning_rate=1e-4)
 model.compile(loss='mse', optimizer=opt, metrics=['mse'])
-model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=750, callbacks=[callback])
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1000, callbacks=[callback])
 scaled_predict = model.predict(X_val)
 predict = sc.inverse_transform(scaled_predict)
 plt.plot(time, predict, label='predicted')
@@ -110,4 +117,29 @@ plt.title('COVID Deaths in Pierce County')
 plt.xlabel('Time')
 plt.ylabel('Deaths')
 plt.legend()
+plt.show()
+
+
+# Now, predict the next week of deaths
+X_new = covid_scaled[len(covid_scaled) - n_lag:len(covid_scaled), 0]
+starting_time = covid_data.index[len(covid_data) - 1] + timedelta(days=1)
+times = []
+predicted_values = []
+for i in range(7):
+    X_new_temp = np.asarray([X_new])
+    X_new_temp = np.reshape(X_new_temp, (X_new_temp.shape[0], X_new_temp.shape[1], 1))
+    scaled_predict = model.predict(X_new_temp)
+    predict = sc.inverse_transform(scaled_predict)
+    predicted_values.append(predict[0, 0])
+    X_new = np.concatenate([X_new, predict[0]])
+    X_new = np.delete(X_new, [0])
+    times.append(starting_time + timedelta(days=i))
+
+plt.plot(times, predicted_values)
+plt.title('Predicted COVID-19 Deaths in Pierce County')
+plt.xlabel('Time')
+plt.xticks(rotation=45)
+plt.ylabel('Deaths')
+plt.legend()
+plt.savefig(datetime.now().strftime('predicted_covid_deaths_week_of_%Y_%m_%d.png'))
 plt.show()
