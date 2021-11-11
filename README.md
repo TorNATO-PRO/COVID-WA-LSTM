@@ -1,8 +1,8 @@
-# COVID-WA-LSTM
+# COVID Cases/Deaths Predictor
 
 Author: Nathan Waltz
 
-I am creating an LSTM to predict how many deaths there will be on a given day in **Pierce County, WA**, 
+I am creating an CNN-LSTM to predict how many deaths there will be on a given day in **Pierce County, WA**, 
 based on previous days with a time lag. I am currently using the deaths that occured in the past 4 weeks as a predictor.
 
 NOTE: This LSTM is not entirely complete yet, I still have to do some hyperparameter optimization. Also, its bias towards zeros, and that needs to be fixed.
