@@ -89,7 +89,7 @@ for i in range(n_lag, len(covid_data)):
 X_val, y_val = np.array(X_val), np.array(y_val)
 X_val = np.reshape(X_val, (X_val.shape[0], X_val.shape[1], 1))
 
-# define a LSTM
+# define a LSTM (predicting deaths)
 model = Sequential()
 model.add(LSTM(units=n_lag, activation='relu', input_shape=(n_lag, 1), return_sequences=True, kernel_regularizer=l2(0.1), recurrent_regularizer=l2(0.1), bias_regularizer=l2(0.1)))
 model.add(Dropout(0.2))
@@ -97,18 +97,17 @@ model.add(LSTM(units=30, activation='relu'))
 model.add(Dropout(0.2))
 model.add(Dense(units=1, activation='sigmoid'))
 
-# compile on the data
+# compile on the data (COVID-19 Deaths in Pierce County)
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
 opt = tf.keras.optimizers.Adam(learning_rate=1e-4)
 model.compile(loss='mse', optimizer=opt, metrics=['mse'])
-fit_history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1500, callbacks=[callback])
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=750, callbacks=[callback])
 scaled_predict = model.predict(X_val)
 predict = sc.inverse_transform(scaled_predict)
 plt.plot(time, predict, label='predicted')
 plt.plot(covid_data.index, covid_data['deaths'], label='actual')
-plt.title('COVID Deaths')
+plt.title('COVID Deaths in Pierce County')
 plt.xlabel('Time')
 plt.ylabel('Deaths')
 plt.legend()
 plt.show()
-
