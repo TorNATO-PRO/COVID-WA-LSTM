@@ -49,9 +49,6 @@ test_cutoff = covid_data.index.max() - timedelta(days=30)
 train, test = covid_data[covid_data.index < test_cutoff], \
               covid_data[covid_data.index >= test_cutoff]
 
-plt.scatter(covid_data.index, covid_data['deaths'])
-plt.show()
-
 # scale the data for faster processing
 sc = MinMaxScaler(feature_range=(0, 1))
 covid_scaled = sc.fit_transform(covid_data)
@@ -94,7 +91,7 @@ X_val = np.reshape(X_val, (X_val.shape[0], X_val.shape[1], 1))
 
 # define a LSTM
 model = Sequential()
-model.add(LSTM(units=n_lag, activation='relu', input_shape=(n_lag, 1), return_sequences=True, kernel_regularizer=l2(0.01), recurrent_regularizer=l2(0.01), bias_regularizer=l2(0.01)))
+model.add(LSTM(units=n_lag, activation='relu', input_shape=(n_lag, 1), return_sequences=True, kernel_regularizer=l2(0.1), recurrent_regularizer=l2(0.1), bias_regularizer=l2(0.1)))
 model.add(Dropout(0.2))
 model.add(LSTM(units=30, activation='relu'))
 model.add(Dropout(0.2))
@@ -104,7 +101,7 @@ model.add(Dense(units=1, activation='sigmoid'))
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
 opt = tf.keras.optimizers.Adam(learning_rate=1e-4)
 model.compile(loss='mse', optimizer=opt, metrics=['mse'])
-fit_history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=500, callbacks=[callback])
+fit_history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1500, callbacks=[callback])
 scaled_predict = model.predict(X_val)
 predict = sc.inverse_transform(scaled_predict)
 plt.plot(time, predict, label='predicted')
