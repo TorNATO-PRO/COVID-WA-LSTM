@@ -12,13 +12,11 @@ from darts.dataprocessing.transformers import (
     Scaler,
     MissingValuesFiller
 )
-from darts.utils.timeseries_generation import datetime_attribute_timeseries
 from darts.models import RNNModel
 
 # define the pipeline
 filler = MissingValuesFiller()
 scaler = Scaler()
-observation = 'deaths'
 
 # define the datatypes that the dataset can contain
 datatypes = {
@@ -55,53 +53,58 @@ def retrieve_time_series_data(state: str, county: str, value: str, df: pd.DataFr
         df = read_csv()
     return convert_to_timeseries(filter_by_county(df, state, county, value), 'date', value)
 
-series = retrieve_time_series_data('Washington', 'Pierce', observation)
+possible_features = ['cases', 'deaths']
 
-training_cutoff = pd.Timestamp('20220201')
-train, test = series.split_after(training_cutoff)
-train_transformed = scaler.fit_transform(train)
-test_transformed = scaler.transform(test)
+for observation in possible_features:
+    series = retrieve_time_series_data('Washington', 'Pierce', observation)
 
-# covariates actually make the performance worse? no seasonality or something :P
-# covariates = datetime_attribute_timeseries(series, attribute='year', one_hot=False)
-# covariates = covariates.stack(datetime_attribute_timeseries(series, attribute='month', one_hot=False))
-# covariates = covariates.stack(
-#     TimeSeries.from_times_and_values(
-#         times=series.time_index,
-#         values=np.arange(len(series)),
-#         columns=['linear_increase']
-#     )
-# )
-# covariates = covariates.astype(np.float32)
+    training_cutoff = pd.Timestamp('20220201')
+    train, test = series.split_after(training_cutoff)
+    train_transformed = scaler.fit_transform(train)
+    test_transformed = scaler.transform(test)
 
-# covariant_scaler = Scaler()
-# covariant_train, covariant_test = covariates.split_after(training_cutoff)
-# covariant_scaler.fit(covariant_train)
-# covariates_transformed = covariant_scaler.transform(covariates)
+    # covariates actually make the performance worse? no seasonality or something :P
+    # covariates = datetime_attribute_timeseries(series, attribute='year', one_hot=False)
+    # covariates = covariates.stack(datetime_attribute_timeseries(series, attribute='month', one_hot=False))
+    # covariates = covariates.stack(
+    #     TimeSeries.from_times_and_values(
+    #         times=series.time_index,
+    #         values=np.arange(len(series)),
+    #         columns=['linear_increase']
+    #     )
+    # )
+    # covariates = covariates.astype(np.float32)
 
-# define RNN model
-my_model = RNNModel(
-    model="LSTM",
-    model_name="COVID-LSTM",
-    hidden_dim=8,
-    dropout=0.1,
-    batch_size=14,
-    n_epochs=80,
-    optimizer_kwargs={"lr": 1e-3},
-    log_tensorboard=True,
-    random_state=42,
-    training_length=15,
-    input_chunk_length=7,
-    force_reset=True,
-    save_checkpoints=True,
-)
+    # covariant_scaler = Scaler()
+    # covariant_train, covariant_test = covariates.split_after(training_cutoff)
+    # covariant_scaler.fit(covariant_train)
+    # covariates_transformed = covariant_scaler.transform(covariates)
 
-my_model.fit(series=train_transformed,
-             val_series=test_transformed,
-             verbose=True)
-pred = my_model.predict(30)
-pred = scaler.inverse_transform(pred)
-series.plot(label="Actual # of {observation}")
-pred.plot(label=f"{observation} forecast")
-plt.title(f"COVID-19 {observation.capitalize()} Forecast - Pierce County")
-plt.show()
+    # define RNN model
+    my_model = RNNModel(
+        model="LSTM",
+        model_name="COVID-LSTM",
+        hidden_dim=8,
+        dropout=0.1,
+        batch_size=14,
+        n_epochs=80,
+        optimizer_kwargs={"lr": 1e-3},
+        log_tensorboard=True,
+        random_state=42,
+        training_length=15,
+        input_chunk_length=7,
+        force_reset=True,
+        save_checkpoints=True,
+    )
+
+    my_model.fit(series=train_transformed,
+                 val_series=test_transformed,
+                 verbose=True)
+    pred = my_model.predict(30)
+    pred = scaler.inverse_transform(pred)
+    observation_pp = observation.capitalize()
+    series.plot(label=f"Actual # of {observation_pp}")
+    pred.plot(label=f"{observation_pp} forecast")
+    plt.title(f"COVID-19 {observation_pp} Forecast - Pierce County")
+    plt.savefig(f"COVID-19-{observation_pp}-Forecast.png")
+    plt.close()

@@ -1,0 +1,11 @@
+dropout: 0.1
+hidden_dim: 8
+input_chunk_length: 7
+input_size: 1
+name: LSTM
+nr_params: 1
+num_layers: 1
+optimizer_kwargs:
+  lr: 0.001
+output_chunk_length: 1
+target_size: 1
