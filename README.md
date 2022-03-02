@@ -8,7 +8,7 @@ Usage of this program requires installation of the `Darts` package as well as `P
 
 ## Plot of Projected COVID-19 Deaths (as of March 02, 2021)
 
-![COVID-19 Deaths](COVID-19-Death-Forecast.png)
+![COVID-19 Deaths](COVID-19-Deaths-Forecast.png)
 
 ## Plot of COVID-19 Cases (as of March 02, 2021)
 
