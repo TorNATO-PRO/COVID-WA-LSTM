@@ -2,27 +2,14 @@
 
 Author: Nathan Waltz
 
-I am creating an LSTM-RNN to predict how many deaths there will be on a given day in ***Pierce County, WA***, 
-based on previous days with a time lag. I am currently using the deaths that occured in the past 4 weeks as a predictor.
+I am creating an LSTM-RNN with 8 hidden layers to predict how many deaths there will be on a given day in ***Pierce County, WA*** using this [dataset](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv). 
 
-NOTE: This LSTM is not entirely complete yet, I still have to do some hyperparameter optimization. Also, its bias towards zeros, and that needs to be fixed.
+Usage of this program requires installation of the `Darts` package as well as `Pytorch`. You can do this either via Anaconda or pip!
 
-I am using this [dataset](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv)
+## Plot of Projected COVID-19 Deaths (as of March 02, 2021)
 
-**Disclaimer**: Please don't use this for anything serious...
+![COVID-19 Deaths](COVID-19-Death-Forecast.png)
 
-## Plot of COVID-19 Deaths (as of November 10, 2021)
+## Plot of COVID-19 Cases (as of March 02, 2021)
 
-![COVID-19 Deaths](covid_deaths.png)
-
-## Plot of COVID-19 Cases (as of November 10, 2021)
-
-![COVID-19 Cases](covid_cases.png)
-
-## Plot of predicted COVID-19 Deaths (as of November 10, 2021)
-
-![COVID-19 Cases](predicted_covid_deaths_week_of_2021_11_10.png)
-
-## Plot of predicted COVID-19 Cases (as of November 10, 2021)
-
-![COVID-19 Cases](predicted_covid_cases_week_of_2021_11_10.png)
+![COVID-19 Cases](COVID-19-Cases-Forecast.png)
