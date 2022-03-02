@@ -6,10 +6,30 @@ I am creating an LSTM-RNN with 8 hidden layers to predict how many deaths there 
 
 Usage of this program requires installation of the `Darts` package as well as `Pytorch`. You can do this either via Anaconda or pip!
 
-## Plot of Projected COVID-19 Deaths (as of March 02, 2021)
+### Run Instructions
 
-![COVID-19 Deaths](COVID-19-Deaths-Forecast.png)
+#### Install Requirements
+
+You only need to do this once. Make sure that you have `python3` and `pip3` installed on your system.
+
+```
+$ pip install -r requirements.txt
+```
+
+#### Run Program
+
+```
+$ python3 ./analyze.py
+```
+
+## Projected COVID-19 Deaths (as of March 02, 2021)
+
+![COVID-19 Deaths](COVID-19-Deaths-Forecast-Washington-Pierce.png)
+
+![COVID-19 Deaths](COVID-19-Deaths-Forecast-Washington-Whitman.png)
 
 ## Plot of COVID-19 Cases (as of March 02, 2021)
 
-![COVID-19 Cases](COVID-19-Cases-Forecast.png)
+![COVID-19 Cases](COVID-19-Cases-Forecast-Washington-Pierce.png)
+
+![COVID-19 Cases](COVID-19-Cases-Forecast-Washington-Whitman.png)
