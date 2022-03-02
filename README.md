@@ -28,8 +28,12 @@ $ python3 ./analyze.py
 
 ![COVID-19 Deaths](COVID-19-Deaths-Forecast-Washington-Whitman.png)
 
+![COVID-19 Deaths](COVID-19-Deaths-Forecast-Idaho-Ada.png)
+
 ## Plot of COVID-19 Cases (as of March 02, 2021)
 
 ![COVID-19 Cases](COVID-19-Cases-Forecast-Washington-Pierce.png)
 
 ![COVID-19 Cases](COVID-19-Cases-Forecast-Washington-Whitman.png)
+
+![COVID-19 Deaths](COVID-19-Cases-Forecast-Idaho-Ada.png)

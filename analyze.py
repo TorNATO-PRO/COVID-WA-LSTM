@@ -13,6 +13,7 @@ from darts.dataprocessing.transformers import (
     MissingValuesFiller
 )
 from darts.models import RNNModel
+from darts.utils.likelihood_models import GaussianLikelihood
 
 # define the pipeline
 filler = MissingValuesFiller()
