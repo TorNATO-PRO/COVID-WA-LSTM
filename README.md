@@ -2,7 +2,7 @@
 
 Author: Nathan Waltz
 
-I am creating an LSTM-RNN with 8 hidden layers to predict how many deaths there will be on a given day in ***Pierce County, WA*** using this [dataset](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv). 
+I am creating an LSTM-RNN with 8 hidden layers to predict how many deaths there will be on a given day in various states/counties using this [dataset](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv). 
 
 Usage of this program requires installation of the `Darts` package as well as `Pytorch`. You can do this either via Anaconda or pip!
 
