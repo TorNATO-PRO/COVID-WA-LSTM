@@ -48,15 +48,20 @@ def filter_by_county(df: pd.DataFrame, state: str = 'Washington', county: str = 
     df.drop(df.columns.difference(['date', value]), axis=1, inplace=True)
     return df
 
-def retrieve_time_series_data(state: str, county: str, value: str, df: pd.DataFrame = None):
+def retrieve_time_series_data(state: str, county: str, value: str, df: pd.DataFrame = None) -> TimeSeries:
     if df is None:
         df = read_csv()
     return convert_to_timeseries(filter_by_county(df, state, county, value), 'date', value)
 
 possible_features = ['cases', 'deaths']
+state = input('Enter the state (i.e. Washington): ')
+county = input('Enter the county (i.e. King): ')
+df = read_csv()
+if len(df[(df['county'] == county) & (df['state'] == state)]) == 0:
+    raise Exception("Invalid state-county combination")
 
 for observation in possible_features:
-    series = retrieve_time_series_data('Washington', 'Pierce', observation)
+    series = retrieve_time_series_data(state, county, observation, df)
 
     training_cutoff = pd.Timestamp('20220201')
     train, test = series.split_after(training_cutoff)
@@ -105,6 +110,6 @@ for observation in possible_features:
     observation_pp = observation.capitalize()
     series.plot(label=f"Actual # of {observation_pp}")
     pred.plot(label=f"{observation_pp} forecast")
-    plt.title(f"COVID-19 {observation_pp} Forecast - Pierce County")
-    plt.savefig(f"COVID-19-{observation_pp}-Forecast.png")
+    plt.title(f"COVID-19 {observation_pp} Forecast - {county} County, {state}")
+    plt.savefig(f"COVID-19-{observation_pp}-Forecast-{state}-{county}.png")
     plt.close()
